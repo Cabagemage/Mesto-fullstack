@@ -1,0 +1,9 @@
+@import url(./__message/infotooltip__message.css);
+@import url(./__image/infotooltip__image.css);
+
+.infotooltip{
+display: flex;
+flex-direction: column;
+
+align-items: center;
+}

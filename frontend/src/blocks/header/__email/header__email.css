@@ -1,0 +1,6 @@
+.header__email{
+  display: flex;
+  justify-self: end;
+  text-align: end;
+  padding-right: 24px;
+}
