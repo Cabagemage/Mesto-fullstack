@@ -33,16 +33,21 @@ function App() {
   const [isInfoPopupOpen, setInfoPopupOpen] = useState(false); // Открытие и закрытие попапа
   const [infoPopup, setInfoPopup] = useState(false) // Этот стейт указывает тру или фоллс для отображения нужного элемента
   const [email, setEmail] = useState(""); //Сохранение емейла в стейте
+  const [token, setToken] = useState("")
   useEffect(() => {
-    apiProfile
-      .getAppinfo()
-      .then((res) => {
-        const [initCards, info] = res;
-        setCurrentUser(info);
-        setCards(initCards);
+    Promise.all([
+      apiProfile.getUserInformation(token),
+      apiProfile.getInitialCards(token)
+    ])
+      .then(([user, cards]) => {
+        setCurrentUser(user);
+        console.log(user)
+        setCards(cards.data)
       })
-      .catch((err) => console.log(err));
-  }, []);
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [token]);
 
   const handleOverlayClose = (e) => {
     if (e.target !== e.currentTarget) {
@@ -53,8 +58,9 @@ function App() {
 
   const handleUpdateUser = (user) => {
     apiProfile
-      .setUserInfo(user)
+      .setUserInfo(user, token)
       .then((res) => {
+        console.log(user, token)
         setCurrentUser(res);
         closeAllPopups();
       })
@@ -63,7 +69,7 @@ function App() {
 
   const handleUpdateAvatar = (url) => {
     apiProfile
-      .changeProfileAvatar(url)
+      .changeProfileAvatar(url, token)
       .then((res) => {
         setCurrentUser(res);
         closeAllPopups();
@@ -76,11 +82,11 @@ function App() {
   //    });
   //  }
 
-  const handleAddPlaceSubmit = (name, link) => {
+  const handleAddPlaceSubmit = (data) => {
     apiProfile
-      .postNewCard(name, link)
+      .postNewCard(data, token)
       .then((data) => {
-        setCards([...cards, data]);
+        setCards([...cards, data, token]);
         closeAllPopups();
       })
       .catch((err) => console.log(err));
@@ -107,19 +113,20 @@ function App() {
 
   function handleCardLike(card) {
     // Снова проверяем, есть ли уже лайк на этой карточке
-    const isLiked = card.likes.some((i) => i._id === currentUser._id);
-
+    const isLiked = card.likes.some(i => i === currentUser._id);
+    console.log(card.likes, currentUser._id, isLiked)
     apiProfile
-      .changeLikeStatus(card._id, !isLiked)
+      .changeLikeStatus(card._id, !isLiked, token)
       .then((newCard) => {
-        const newCards = cards.map((c) => (c._id === card._id ? newCard : c));
+        const newCards = cards.map((c) => (c === card._id ? newCard : c));
         setCards(newCards);
       })
       .catch((err) => console.log(err));
   }
+
   function handleCardDelete(card) {
     apiProfile
-      .deleteThisCard(card._id)
+      .deleteThisCard(card._id, token)
       .then(() => {
         const newCards = cards.filter((c) =>  c._id !== card._id)
         setCards(newCards);
@@ -138,20 +145,20 @@ function App() {
 
   function handleTokenCheck() {
     const jwt = localStorage.getItem("jwt");
-    Auth.checkToken(jwt)
+    if(jwt){setToken(jwt)
+      Auth.checkToken(jwt)
       .then((res) => {
         if (res) {
           setLogin(true);
-          setEmail(res.data.email);
-          history.push("/");
+          setEmail(res.email);
+          history.push('/');
         }
       })
       .catch((err) => {
-      if(err === 401){console.log('Токен не передан или передан не в том формате')}
-      if(err === 400){console.log('Переданный токен некорректен')}
-  })
+        console.log(err);
+      })
+  }
 }
-
   const onInfoPopup = () => {
     setInfoPopupOpen(true);
   };
@@ -181,8 +188,10 @@ function App() {
   const handleLogin = (email, password) => {
     Auth.signIn(email, password)
       .then((res) => {
-        if (res.token) {
+        if (res && res.token) {
+          //  Поменял ('jwt', token) на текущий вариант
           localStorage.setItem("jwt", res.token);
+          console.log(res.token)
           setLogin(true);
           setEmail(email);
           history.push("/");
@@ -249,7 +258,6 @@ function App() {
             isOpen={isAddImagePopupOpen}
             isClose={closeAllPopups}
             onSubmit={handleAddPlaceSubmit}
-            // onAddPlace={}
             closeToOverlay={handleOverlayClose}
           />
           <EditAvatarPopup

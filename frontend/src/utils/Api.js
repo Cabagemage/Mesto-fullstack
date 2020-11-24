@@ -16,18 +16,26 @@ class Api {
     }
 
     // Получение массива карточек с сервера
-    getInitialCards() {
+    getInitialCards(token) {
         return fetch(`${this.baseUrl}/cards`, {
-            headers: this.headers
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              }
         })
             .then(this.checkStatus)
     }
 
     // Метод для создания новой карточки
-    postNewCard(data) {
+    postNewCard(data, token) {
         return fetch(`${this.baseUrl}/cards`, {
             method: 'POST',
-            headers: this.headers,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
             body: JSON.stringify({
                 name: data.name,
                 link: data.link,
@@ -36,25 +44,37 @@ class Api {
             .then(this.checkStatus)
     };
     // Метод для удаления карточки
-    deleteThisCard(cardId) {
+    deleteThisCard(cardId, token) {
         return fetch(`${this.baseUrl}/cards/${cardId}`, {
             method: 'Delete',
-            headers: this.headers
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              }
         })
             .then(this.checkStatus)
     }
     // Метод для получения инфы профиля
-    getUserInformation() {
+    getUserInformation(token) {
         return fetch(`${this.baseUrl}/users/me`, {
-            headers: this.headers,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              }
         })
             .then(this.checkStatus)
     }
     //Метод для изменения инфы профиля
-    setUserInfo(data) {
+    setUserInfo(data, token) {
         return fetch(`${this.baseUrl}/users/me`, {
             method: 'PATCH',
-            headers: this.headers,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
             body: JSON.stringify({
                 name: data.name,
                 about: data.about,
@@ -64,10 +84,14 @@ class Api {
 
     }
     //Метод для изменения аватарки
-    changeProfileAvatar(data) {
+    changeProfileAvatar(data, token) {
         return fetch(`${this.baseUrl}/users/me/avatar`, {
             method: 'PATCH',
-            headers: this.headers,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
             body: JSON.stringify({
                 avatar: data.avatar
             })
@@ -76,26 +100,29 @@ class Api {
     }
     // Лайкос
 
-    changeLikeStatus(cardId, isLiked) {
+    changeLikeStatus(cardId, isLiked, token) {
         if (isLiked) {
             return fetch(`${this.baseUrl}/cards/likes/${cardId}`, {
                 method: 'PUT',
-                headers: this.headers
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                  }
             }).then(this.checkStatus)
         } else if (!isLiked) {
             return fetch(`${this.baseUrl}/cards/likes/${cardId}`, {
                 method: 'DELETE',
-                headers: this.headers
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                  }
             }).then(this.checkStatus)
         }
     }
 
 }
 export const apiProfile = new Api({
-    baseUrl: 'http://notinstagram.students.nomoreparties.co',
-    headers: {
-        authorization: '60dbe103-3bf7-4b68-8dd7-d41370d9694c',
-        'Content-Type': 'application/json'
-    }
-
+    baseUrl: 'http://localhost:3000',
 });

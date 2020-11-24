@@ -1,30 +1,26 @@
+require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const BadRequest = require('../utils/Errors/BadRequest');
 
-const handleAuthError = (res) => {
-  res
-    .status(401)
-    .send({ message: 'Необходима авторизация' });
-};
-
-const extractBearerToken = (header) => header.replace('Bearer ', '');
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return handleAuthError(res);
+    throw new BadRequest('Необходима авторизация');
   }
 
-  const token = extractBearerToken(authorization);
+  const token = authorization.replace('Bearer ', '');
   let payload;
 
   try {
-    payload = jwt.verify(token, 'super-strong-secret');
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret');
   } catch (err) {
-    return handleAuthError(res);
+    throw new BadRequest('Необходима авторизация');
   }
 
   req.user = payload;
-  return next();
-  // Return сломает?
+
+  next();
 };
