@@ -42,7 +42,7 @@ module.exports.deleteCard = (req, res, next) => {
 };
 
 module.exports.likeCard = (req, res, next) => cardSchema.findByIdAndUpdate(req.params._cardId,
-  { $addToSet: { likes: req.user._id } }, { new: true })
+  { $addToSet: { likes: req.user.id } }, { new: true })
   .orFail(() => {
     throw new NotFound('Карточка не найдена');
   })
@@ -51,7 +51,7 @@ module.exports.likeCard = (req, res, next) => cardSchema.findByIdAndUpdate(req.p
 
 module.exports.dislikeCard = (req, res, next) => cardSchema.findByIdAndUpdate(
   req.params._cardId,
-  { $pull: { likes: req.user._id } },
+  { $pull: { likes: req.user.id } },
   { new: true }
 )
   .orFail(() => {

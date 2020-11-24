@@ -60,7 +60,7 @@ function App() {
     apiProfile
       .setUserInfo(user, token)
       .then((res) => {
-        console.log(user, token)
+        console.log(res)
         setCurrentUser(res);
         closeAllPopups();
       })
@@ -116,7 +116,7 @@ function App() {
     const isLiked = card.likes.some(i => i === currentUser._id);
     console.log(card.likes, currentUser._id, isLiked)
     apiProfile
-      .changeLikeStatus(card._id, !isLiked, token)
+      .changeLikeStatus(card._id, isLiked, token)
       .then((newCard) => {
         const newCards = cards.map((c) => (c === card._id ? newCard : c));
         setCards(newCards);

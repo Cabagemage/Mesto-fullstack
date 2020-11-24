@@ -68,7 +68,7 @@ module.exports.findUser = (req, res, next) => {
 
 module.exports.changeUserInfo = (req, res, next) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.params._userId, { name, about }, {
+  User.findByIdAndUpdate(req.params.userId, { name, about }, {
     new: true, // обработчик then получит на вход обновлённую запись
     runValidators: true, // данные будут валидированы перед изменением
   }).orFail(() => {
@@ -81,14 +81,14 @@ module.exports.changeUserInfo = (req, res, next) => {
 
 module.exports.changeUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, {
+  User.findByIdAndUpdate(req.user.id, { avatar }, {
     new: true,
     runValidators: true,
   }).orFail(() => {
     throw new BadRequest('При обновлении аватара произошла ошибка. Убедитесь что передали корректную ссылку');
   })
     .then((user) => {
-      res.status(200).send({ data: user.avatar });
+      res.status(200).send(user);
     })
     .catch(next);
 };

@@ -3,10 +3,10 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const express = require('express');
 const cors = require('cors');
-const { login, createUser } = require('./controllers/users');
-const { userValidation } = require('./middlewares/validation');
+const { Joi, celebrate, } = require('celebrate');
+const router = require('./routes/index.js');
+const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const index = require('./routes/index');
 
 const { PORT } = process.env;
 const app = express();
@@ -17,7 +17,7 @@ const mongoDBOptions = {
   useCreateIndex: true,
   useFindAndModify: false,
 };
-
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -27,11 +27,23 @@ app.get('/crash-test', () => {
   }, 0);
 });
 
-app.use(cors());
-app.post('/signin', login, userValidation);
-app.post('/signup', createUser, userValidation);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(3),
+  }),
+}), login);
+
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(3),
+  }),
+}), createUser);
+
 app.use(auth);
-app.use('/', index);
+
+app.use('/', router);
 
 mongoose.connect(mongoDBUrl, mongoDBOptions);
 
