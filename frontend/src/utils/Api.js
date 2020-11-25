@@ -124,5 +124,5 @@ class Api {
 
 }
 export const apiProfile = new Api({
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://api.happycabage.students.nomoreparties.xyz',
 });
