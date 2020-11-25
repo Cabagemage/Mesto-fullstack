@@ -8,7 +8,7 @@ const router = require('./routes/index.js');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 
-const { PORT } = process.env;
+const { PORT = 3000 } = process.env;
 const app = express();
 
 const mongoDBUrl = 'mongodb://localhost:27017/mestodb';
