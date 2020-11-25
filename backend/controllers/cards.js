@@ -18,7 +18,7 @@ module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user.id;
   cardSchema.create({ name, link, owner })
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.status(200).send(card))
     .catch(next);
 };
 
@@ -34,7 +34,7 @@ module.exports.deleteCard = (req, res, next) => {
       if (card.owner.id === userId) {
         cardSchema.findByIdAndDelete(_cardId)
           .then((thisCard) => {
-            res.status(200).send({ data: thisCard });
+            res.status(200).send(thisCard);
           });
       }
     })
@@ -46,7 +46,7 @@ module.exports.likeCard = (req, res, next) => cardSchema.findByIdAndUpdate(req.p
   .orFail(() => {
     throw new NotFound('Карточка не найдена');
   })
-  .then((likes) => { res.status(200).send({ data: likes }); })
+  .then((likes) => { res.status(200).send(likes); })
   .catch(next);
 
 module.exports.dislikeCard = (req, res, next) => cardSchema.findByIdAndUpdate(
@@ -57,5 +57,5 @@ module.exports.dislikeCard = (req, res, next) => cardSchema.findByIdAndUpdate(
   .orFail(() => {
     throw new NotFound('Карточка не найдена');
   })
-  .then((likes) => { res.status(200).send({ data: likes }); })
+  .then((likes) => { res.status(200).send(likes); })
   .catch(next);

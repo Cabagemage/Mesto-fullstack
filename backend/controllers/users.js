@@ -26,12 +26,10 @@ module.exports.getOwnerInfo = (req, res, next) => {
     throw new NotFound('Не найден');
   })
     .then((user) => res.send(user))
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) { res.status(409).send({ message: 'Не введен логин или пароль' }); }
   User.findOne({ email })
@@ -52,30 +50,28 @@ module.exports.createUser = (req, res) => {
       password: hash,
       email: user.email
     });
-  })).catch(() => {
-    throw new BadRequest('Что-то не так с запросом');
-  });
+  })).catch(next);
 };
 
 module.exports.findUser = (req, res, next) => {
-  User.findById(req.params._userId)
+  User.findById(req.user.id)
     .orFail(() => {
       throw new NotFound('Пользователь не найден');
     }).then((user) => {
-      res.status(200).send({ data: user });
+      res.status(200).send(user);
     }).catch(next);
 };
 
 module.exports.changeUserInfo = (req, res, next) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.params.userId, { name, about }, {
+  User.findByIdAndUpdate(req.user.id, { name, about }, {
     new: true, // обработчик then получит на вход обновлённую запись
     runValidators: true, // данные будут валидированы перед изменением
   }).orFail(() => {
     throw new BadRequest('При обновлении данных пользователя возникла ошибка. Проверьте правильность набора.');
   })
     .then((user) => {
-      res.status(200).send({ data: user });
+      res.status(200).send(user);
     }).catch(next);
 };
 

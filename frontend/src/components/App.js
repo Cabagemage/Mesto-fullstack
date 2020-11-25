@@ -41,7 +41,6 @@ function App() {
     ])
       .then(([user, cards]) => {
         setCurrentUser(user);
-        console.log(user)
         setCards(cards.data)
       })
       .catch((err) => {
@@ -60,7 +59,6 @@ function App() {
     apiProfile
       .setUserInfo(user, token)
       .then((res) => {
-        console.log(res)
         setCurrentUser(res);
         closeAllPopups();
       })
@@ -85,9 +83,10 @@ function App() {
   const handleAddPlaceSubmit = (data) => {
     apiProfile
       .postNewCard(data, token)
-      .then((data) => {
-        setCards([...cards, data, token]);
+      .then((res) => {
+        setCards([...cards, res]);
         closeAllPopups();
+
       })
       .catch((err) => console.log(err));
   };
@@ -113,12 +112,11 @@ function App() {
 
   function handleCardLike(card) {
     // Снова проверяем, есть ли уже лайк на этой карточке
-    const isLiked = card.likes.some(i => i === currentUser._id);
-    console.log(card.likes, currentUser._id, isLiked)
+    const isLiked = card.likes.some(i => i  === currentUser._id);
     apiProfile
-      .changeLikeStatus(card._id, isLiked, token)
+      .changeLikeStatus(card._id, !isLiked, token)
       .then((newCard) => {
-        const newCards = cards.map((c) => (c === card._id ? newCard : c));
+        const newCards = cards.map((c) => (c._id === card._id ? newCard : c));
         setCards(newCards);
       })
       .catch((err) => console.log(err));
@@ -191,7 +189,6 @@ function App() {
         if (res && res.token) {
           //  Поменял ('jwt', token) на текущий вариант
           localStorage.setItem("jwt", res.token);
-          console.log(res.token)
           setLogin(true);
           setEmail(email);
           history.push("/");

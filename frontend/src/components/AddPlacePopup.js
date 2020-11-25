@@ -22,7 +22,11 @@ export default function AddPlacePopup({ isOpen, isClose, closeToOverlay, onSubmi
     const imageRef = React.useRef('')
 
 
-
+    React.useEffect(() => {
+        nameRef.current.value = '';
+        imageRef.current.value = '';
+      },[isOpen])
+      
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit({ name: nameRef.current.value, link: imageRef.current.value });
