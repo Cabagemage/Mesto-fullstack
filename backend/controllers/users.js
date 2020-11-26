@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFound = require('../utils/Errors/NotFound');
 const BadRequest = require('../utils/Errors/BadRequest');
-
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getUsers = (req, res, next) => {
@@ -22,19 +21,21 @@ module.exports.getUsers = (req, res, next) => {
 module.exports.getOwnerInfo = (req, res, next) => {
   User.findById(
     req.user.id
-  ).orFail(() => {
-    throw new NotFound('Не найден');
-  })
+  )
     .then((user) => res.send(user))
-    .catch(next);
+    .catch((err) => {
+      if (err)
+      { const error = new NotFound('Не найден')
+      next(error)}
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
   const { email, password } = req.body;
-  if (!email || !password) { res.status(409).send({ message: 'Не введен логин или пароль' }); }
   User.findOne({ email })
     .then((user) => {
-      if (user) { res.status(400).send({ message: 'Такой пользователь уже есть' }); }
+      if (user) { const error = new BadRequest('Такой пользователь уже существует')
+    next(error)}
     });
   bcrypt.hash(password, 10).then((hash) => User.create({
     email: req.body.email,
@@ -47,19 +48,24 @@ module.exports.createUser = (req, res, next) => {
       name: user.name,
       about: user.about,
       avatar: user.avatar,
-      password: hash,
       email: user.email
     });
-  })).catch(next);
+  })).catch((err) => {
+    if (err && !email)
+    { const error = new BadRequest('Некорректно введена почта')
+    next(error)}
+  });
 };
 
 module.exports.findUser = (req, res, next) => {
   User.findById(req.user.id)
-    .orFail(() => {
-      throw new NotFound('Пользователь не найден');
-    }).then((user) => {
+      .then((user) => {
       res.status(200).send(user);
-    }).catch(next);
+    }).catch((err) => {
+      if (err)
+      { const error = new NotFound('Пользователь не найден')
+      next(error)}
+    });
 };
 
 module.exports.changeUserInfo = (req, res, next) => {
@@ -67,12 +73,17 @@ module.exports.changeUserInfo = (req, res, next) => {
   User.findByIdAndUpdate(req.user.id, { name, about }, {
     new: true, // обработчик then получит на вход обновлённую запись
     runValidators: true, // данные будут валидированы перед изменением
-  }).orFail(() => {
-    throw new BadRequest('При обновлении данных пользователя возникла ошибка. Проверьте правильность набора.');
   })
     .then((user) => {
       res.status(200).send(user);
-    }).catch(next);
+    }).catch((err) => {
+      if (err && name.length < 2)
+      { const error = new BadRequest('Убедитесь, что длина поля name составляет больше двух символов')
+      next(error)}
+      else if (err && about.length < 2)
+      { const error = new BadRequest('Убедитесь, что длина поля about составляет больше двух символов')
+      next(error) }
+    });
 };
 
 module.exports.changeUserAvatar = (req, res, next) => {
@@ -80,13 +91,15 @@ module.exports.changeUserAvatar = (req, res, next) => {
   User.findByIdAndUpdate(req.user.id, { avatar }, {
     new: true,
     runValidators: true,
-  }).orFail(() => {
-    throw new BadRequest('При обновлении аватара произошла ошибка. Убедитесь что передали корректную ссылку');
   })
     .then((user) => {
       res.status(200).send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err)
+      { const error = new BadRequest('При обновлении аватара произошла ошибка. Убедитесь что передали корректную ссылку')
+      next(error)}
+    })
 };
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
@@ -94,8 +107,7 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign({ id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
       return res.send({ token });
-    }).catch(() => {
-      throw new BadRequest('Что-то не так с авторизацией');
-    })
-    .catch(next);
+    }).catch((err) =>{
+      next(err)
+      })
 };

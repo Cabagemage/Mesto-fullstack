@@ -48,9 +48,8 @@ app.use('/', router);
 mongoose.connect(mongoDBUrl, mongoDBOptions);
 
 app.use((err, req, res, next) => {
-  const status = err.status || 500; res.status(status);
-  const error = err.message;
-  res.status(status).send(error);
-  next();
+  const statusCode = err.statusCode || 500
+  const message = err.message
+  res.status(statusCode).send({message: message});
 });
 app.listen(PORT, () => console.log('SERVER IS RUNNING'));

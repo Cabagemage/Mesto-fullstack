@@ -35,18 +35,17 @@ function App() {
   const [email, setEmail] = useState(""); //Сохранение емейла в стейте
   const [token, setToken] = useState("")
   useEffect(() => {
-    Promise.all([
-      apiProfile.getUserInformation(token),
-      apiProfile.getInitialCards(token)
-    ])
-      .then(([user, cards]) => {
-        setCurrentUser(user);
-        setCards(cards.data)
+      apiProfile.getUserInformation(token).then(user => {
+        setCurrentUser(user)
+      }).then(() => {
+      apiProfile.getInitialCards(token).then(cards => {
+        setCards(cards.data)})
       })
       .catch((err) => {
         console.log(err);
       });
   }, [token]);
+
 
   const handleOverlayClose = (e) => {
     if (e.target !== e.currentTarget) {
@@ -173,7 +172,6 @@ function App() {
         onInfoPopup(); // Открытие попапа
         setInfoPopup(true) // показать сообщение об успешной регистрации
         history.push("/signin"); // Прокинуть юзера на страницу логина
-        console.log(res)
       }
     }).catch((err) => {
       if(err === 400){
@@ -190,6 +188,7 @@ function App() {
           //  Поменял ('jwt', token) на текущий вариант
           localStorage.setItem("jwt", res.token);
           setLogin(true);
+          setToken(res.token)
           setEmail(email);
           history.push("/");
         }
