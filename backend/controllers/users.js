@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFound = require('../utils/Errors/NotFound');
 const BadRequest = require('../utils/Errors/BadRequest');
+const ConflictError = require('../utils/Errors/ConflictError');
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getUsers = (req, res, next) => {
@@ -34,8 +35,12 @@ module.exports.createUser = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email })
     .then((user) => {
-      if (user) { const error = new BadRequest('Такой пользователь уже существует')
+      if (user) { const error = new ConflictError('Такой пользователь уже существует')
     next(error)}
+    else if(password.length === 0 || !password.trim()) {
+      { const error = new ConflictError('Пароль состоит только из пробелов. Это плохо.')
+    next(error)}
+    }
     });
   bcrypt.hash(password, 10).then((hash) => User.create({
     email: req.body.email,

@@ -52,7 +52,6 @@ User.statics.findUserByCredentials = function (email, password) {
       if (!user) {
         return Promise.reject(new NotFound('Пользователь не найден'));
       }
-
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
