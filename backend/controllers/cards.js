@@ -2,17 +2,17 @@
 
 const cardSchema = require('../models/card');
 const NotFound = require('../utils/Errors/NotFound');
- const BadRequest = require('../utils/Errors/BadRequest');
- const ForbiddenError = require('../utils/Errors/ForbiddenError');
+const BadRequest = require('../utils/Errors/BadRequest');
+const ForbiddenError = require('../utils/Errors/ForbiddenError');
 
 module.exports.getCards = (req, res, next) => {
   cardSchema.find({})
     .orFail(() => {
-      throw new NotFound({message: 'Карточки не найдены'});
+      throw new NotFound({ message: 'Карточки не найдены' });
     })
     .then((cards) => {
       res.send({ data: cards });
-    }).catch(next)
+    }).catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -20,20 +20,18 @@ module.exports.createCard = (req, res, next) => {
   const owner = req.user.id;
   cardSchema.create({ name, link, owner })
     .then((card) => res.status(200).send(card))
-    .catch((err) =>{
-      if(err && !name && !link){
-        const error = new BadRequest('С названием и ссылкой на изображение что-то не так')
-        next(error)
+    .catch((err) => {
+      if (err && !name && !link) {
+        const error = new BadRequest('С названием и ссылкой на изображение что-то не так');
+        next(error);
+      } else if (err && !name) {
+        const error = new BadRequest('Введите название карточки');
+        next(error);
+      } else if (err && !link) {
+        const error = new BadRequest('С ссылкой на изображение что-то не так');
+        next(error);
       }
-      else if(err && !name){
-        const error = new BadRequest('Введите название карточки')
-        next(error)
-      }
-      else if(err && !link){
-        const error = new BadRequest('С ссылкой на изображение что-то не так')
-        next(error)
-      }
-    })
+    });
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -47,39 +45,35 @@ module.exports.deleteCard = (req, res, next) => {
           .then((thisCard) => {
             res.status(200).send(thisCard);
           });
-      }
-      else{
-        const err = new ForbiddenError('Запрещено удалять карточки других пользователей')
-        next(err)
-      }
-    })
-    .catch((err) =>{
-      if(err){
-      const error = new NotFound('Карточка уже удалена')
-      next(error)
+      } else {
+        const err = new ForbiddenError('Запрещено удалять карточки других пользователей');
+        next(err);
       }
     })
+    .catch((err) => {
+      if (err) {
+        const error = new NotFound('Карточка уже удалена');
+        next(error);
+      }
+    });
 };
 
 module.exports.likeCard = (req, res, next) => cardSchema.findByIdAndUpdate(req.params._cardId,
   { $addToSet: { likes: req.user.id } }, { new: true })
   .then((likes) => { res.status(200).send(likes); })
-  .catch((err) =>{
-    if(err){
-      const error = new NotFound('Карточка не найдена')
-      next(error)
-      }
-    });
+  .catch((err) => {
+    if (err) {
+      const error = new NotFound('Карточка не найдена');
+      next(error);
+    }
+  });
 
-module.exports.dislikeCard = (req, res, next) => cardSchema.findByIdAndUpdate(
-  req.params._cardId,
-  { $pull: { likes: req.user.id } },
-  { new: true }
-)
+module.exports.dislikeCard = (req, res, next) => cardSchema.findByIdAndUpdate(req.params._cardId,
+  { $pull: { likes: req.user.id } }, { new: true })
   .then((likes) => { res.status(200).send(likes); })
-  .catch((err) =>{
-    if(err){
-      const error = new NotFound('Карточка не найдена')
-      next(error)
-      }
-    })
+  .catch((err) => {
+    if (err) {
+      const error = new NotFound('Карточка не найдена');
+      next(error);
+    }
+  });

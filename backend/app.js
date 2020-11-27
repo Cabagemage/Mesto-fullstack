@@ -40,7 +40,7 @@ app.post('/signup', celebrate({
     password: Joi.string().required().min(3),
   }),
 }), createUser);
-app.use(errors())
+app.use(errors());
 app.use(auth);
 
 app.use('/', router);
@@ -48,8 +48,10 @@ app.use('/', router);
 mongoose.connect(mongoDBUrl, mongoDBOptions);
 
 app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500
-  const message = err.message
-  res.status(statusCode).send({message: message});
+  const statusCode = err.statusCode || 500;
+  const { message } = err;
+
+  res.status(statusCode).send({ message });
+  next();
 });
 app.listen(PORT, () => console.log('SERVER IS RUNNING'));
