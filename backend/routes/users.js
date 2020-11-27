@@ -10,7 +10,7 @@ userRouter.get('/me', getOwnerInfo);
 
 userRouter.get('/:_userId', celebrate({
   params: Joi.object().keys({
-    _userId: Joi.string().hex().required().min(2),
+    _userId: Joi.string().hex().required().length(24),
   })}), findUser);
 
 userRouter.patch('/me',celebrate({

@@ -102,7 +102,7 @@ class Api {
 
     changeLikeStatus(cardId, isLiked, token) {
         if (isLiked) {
-            return fetch(`${this.baseUrl}/cards/likes/${cardId}`, {
+            return fetch(`${this.baseUrl}/cards/${cardId}/likes`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -111,7 +111,7 @@ class Api {
                   }
             }).then(this.checkStatus)
         } else if (!isLiked) {
-            return fetch(`${this.baseUrl}/cards/likes/${cardId}`, {
+            return fetch(`${this.baseUrl}/cards/${cardId}/likes`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
@@ -124,5 +124,5 @@ class Api {
 
 }
 export const apiProfile = new Api({
-     baseUrl: 'https://api.happycabage.students.nomoreparties.xyz'
+     baseUrl: 'https://api.happycabage.students.nomoreparties.xyz',
 });

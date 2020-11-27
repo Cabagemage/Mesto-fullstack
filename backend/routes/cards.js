@@ -7,18 +7,18 @@ const {
 cardsRouter.get('/', getCards);
 
 cardsRouter.delete('/:_cardId', celebrate({
-  body: Joi.object().keys({
-    _cardId: Joi.string().hex().required().min(2),
+  params: Joi.object().keys({
+    _cardId: Joi.string().hex().required().length(24)
   })}), deleteCard)
 
-cardsRouter.put('/likes/:_cardId',celebrate({
+cardsRouter.put('/:_cardId/likes',celebrate({
   params: Joi.object().keys({
     _cardId: Joi.string().required().hex().length(24),
   }),
 }), likeCard);
 
 
-cardsRouter.delete('/likes/:_cardId',celebrate({
+cardsRouter.delete('/:_cardId/likes',celebrate({
   params: Joi.object().keys({
     _cardId: Joi.string().required().hex().length(24),
   }),

@@ -23,10 +23,13 @@ module.exports.getOwnerInfo = (req, res, next) => {
   User.findById(
     req.user.id
   )
+  .orFail(() => {
+    throw new NotFound('Пользователь не найден');
+  })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err)
-      { const error = new NotFound('Не найден')
+      { const error = new BadRequest('Что-то пошло не так')
       next(error)}
     });
 };
@@ -38,7 +41,7 @@ module.exports.createUser = (req, res, next) => {
       if (user) { const error = new ConflictError('Такой пользователь уже существует')
     next(error)}
     else if(password.length === 0 || !password.trim()) {
-      { const error = new ConflictError('Пароль состоит только из пробелов. Это плохо.')
+      { const error = new BadRequest('Пароль состоит только из пробелов. Это плохо.')
     next(error)}
     }
     });
@@ -64,11 +67,14 @@ module.exports.createUser = (req, res, next) => {
 
 module.exports.findUser = (req, res, next) => {
   User.findById(req.user.id)
+  .orFail(() => {
+    throw new NotFound('Пользователь не найден');
+  })
       .then((user) => {
       res.status(200).send(user);
     }).catch((err) => {
-      if (err)
-      { const error = new NotFound('Пользователь не найден')
+      if (err === 'objectId')
+      { const error = new BadRequest('Произошла ошибка.')
       next(error)}
     });
 };
