@@ -56,15 +56,15 @@ module.exports.createUser = (req, res, next) => {
 };
 
 module.exports.findUser = (req, res, next) => {
-  User.findById(req.user.id)
+  User.findById(req.params._userId)
     .orFail(() => {
       throw new NotFound('Пользователь не найден');
     })
     .then((user) => {
       res.status(200).send(user);
     }).catch((err) => {
-      if (err === 'objectId') {
-        const error = new BadRequest('Произошла ошибка.');
+      if (err && !req.params._userid) {
+        const error = new NotFound('Пользователь не найден');
         next(error);
       }
     });
